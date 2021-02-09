@@ -22,12 +22,12 @@ router.get('/', (req, res) => {
 router.get('/:id', (req, res) => {
     Post.findById(req.params.id)
         .then(post => {
-            if (post) {
-                res.status(200).json(post);
-            } else {
+            if (!post) {
                 res.status(404).json({ 
                     message: "The post with the specified ID does not exist" 
                 });
+            } else {
+                res.status(200).json(post);
             }
         })
         .catch(() => {
@@ -83,7 +83,28 @@ router.put('/:id', (req, res) => {
 });
 
 // 5 - DELETE - /api/posts/:id - Removes the post with the specified id and returns the **deleted post object**
+router.delete('/:id', (req, res) => {
+    const id = req.params.id;
+    Post.remove(id)
+        .then(post => {
+            if(!post) {
+                res.status(404).json({ 
+                    message: "The post with the specified ID does not exist" 
+                });
+            } else {
+                res.status(200).json(post);
+            }
+        })
+        .catch(() => {
+            res.status(500).json({ 
+                message: "The post could not be removed"
+            });
+        });
+});
 
 // 6 - GET - /api/posts/:id/comments - Returns an **array of all the comment objects** associated with the post with the specified id
+router.get('/:id/comments', (req, res) => {
+
+});
 
 module.exports = router;
