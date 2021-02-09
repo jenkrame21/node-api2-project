@@ -104,9 +104,9 @@ router.delete('/:id', (req, res) => {
 
 // 6 - GET - /api/posts/:id/comments - Returns an **array of all the comment objects** associated with the post with the specified id
 router.get('/:id/comments', (req, res) => {
-    const id = req.params.id;
+    const postId = req.params.id;
     // FIX THIS!!!
-    Post.findPostComments(id)
+    Post.findPostComments(postId)
         .then(comment => {
             if (!comment) {
                 // NOT WORKING
