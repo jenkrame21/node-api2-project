@@ -105,19 +105,15 @@ router.delete('/:id', (req, res) => {
 // 6 - GET - /api/posts/:id/comments - Returns an **array of all the comment objects** associated with the post with the specified id
 router.get('/:id/comments', (req, res) => {
     const postId = req.params.id;
-    // FIX THIS!!!
     Post.findPostComments(postId)
-        .then(comment => {
-            if (!comment) {
-                // NOT WORKING
-                res.status(404).json({ 
-                    message: "The post with the specified ID does not exist" 
-                });
-            } else {
-                // Works for everything
-                // Shows all the comments by postId
-                res.status(200).json(comment);
-            }
+    .then((comment) => {
+        if (comment.length > 0) {
+            res.status(200).json(comment);
+        } else {
+            res.status(404).json({ 
+                message: "The post with the specified ID does not exist" 
+            });
+        }
         })
         .catch(() => {
             res.status(500).json({ 
