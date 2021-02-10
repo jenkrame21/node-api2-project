@@ -6,7 +6,7 @@ const router = express.Router();
 
 // 1 - GET - /api/posts - Returns **an array of all the post objects** contained in the database
 router.get('/', (req, res) => {
-    Post.find(req.query)
+    Post.find()
         .then(posts => {
             res.status(200).json(posts);
         })
@@ -89,7 +89,7 @@ router.put('/:id', (req, res) => {
 router.delete('/:id', (req, res) => {
     const id = req.params.id;
     Post.remove(id)
-        .then(post => {
+        .then((post) => {
             if(!post) {
                 // WORKING
                 res.status(404).json({ 
