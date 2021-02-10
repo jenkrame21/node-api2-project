@@ -7,4 +7,11 @@ const postRouter = require('./posts/posts-router');
 server.use(express.json());
 server.use('/api/posts', postRouter);
 
+// CATCH-ALL
+server.use('*', (req, res) => {
+    res.status(404).json({ 
+        message: "404 NOT FOUND"
+    });
+});
+
 module.exports = server;

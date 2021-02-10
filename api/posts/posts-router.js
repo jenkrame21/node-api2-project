@@ -10,8 +10,7 @@ router.get('/', (req, res) => {
         .then(posts => {
             res.status(200).json(posts);
         })
-        .catch(error => {
-            console.log(error);
+        .catch(() => {
             res.status(500).json({ 
                 message: "The posts information could not be retrieved" 
             });
@@ -20,14 +19,15 @@ router.get('/', (req, res) => {
 
 // 2 - GET - /api/posts/:id - Returns **the post object with the specified id**
 router.get('/:id', (req, res) => {
-    Post.findById(req.params.id)
-        .then(post => {
-            if (!post) {
+    const id = req.params.id;
+    Post.findById(id)
+        .then((post) => {
+            if (post) {
+                res.status(200).json(post);
+            } else {
                 res.status(404).json({ 
                     message: "The post with the specified ID does not exist" 
                 });
-            } else {
-                res.status(200).json(post);
             }
         })
         .catch(() => {
@@ -40,39 +40,41 @@ router.get('/:id', (req, res) => {
 // 3 - POST - /api/posts - Creates a post using the information sent inside the request body and returns **the newly created post object**
 router.post('/', (req, res) => {
     const { title, contents } = req.body;
-    Post.insert(req.body)
-        .then(postId => {
-            if (!title || !contents) {
-                res.status(400).json({ 
-                    message: "Please provide title and contents for the post" 
-                });
-            } else {
-                res.status(201).json(postId);
-            }
-        })
-        .catch(() => {
-            res.status(500).json({ 
-                message: "There was an error while saving the post to the database" 
-            });
+    if (!title || !contents) {
+        res.status(400).json({ 
+            message: "Please provide title and contents for the post" 
         });
+    } else {
+        Post.insert(req.body)
+            .then(postId => {
+                res.status(201).json({...req.body, id: postId.id});
+            })
+            .catch(() => {
+                res.status(500).json({ 
+                    message: "There was an error while saving the post to the database" 
+                });
+            });
+    }
 });
 
 // 4 - PUT - /api/posts/:id - Updates the post with the specified id using data from the request body and **returns the modified document**, not the original
 router.put('/:id', (req, res) => {
     const id = req.params.id;
     const { title, contents } = req.body;
-    Post.update(id, req.body)
+
+    if (!title || !contents) {
+        res.status(400).json({ 
+            message: "Please provide title and contents for the post"
+        });
+    } else {
+        Post.update(id, req.body)
         .then(post => {
             if (!post) {
                 res.status(404).json({ 
                     message: "The post with the specified ID does not exist" 
                 });
-            } else if(!title || !contents) {
-                res.status(400).json({ 
-                    message: "Please provide title and contents for the post"
-                });
             } else {
-                res.status(200).json(post);
+                res.status(200).json({...req.body, id: post});
             }
         })
         .catch(() => {
@@ -80,6 +82,7 @@ router.put('/:id', (req, res) => {
                 message: "The post information could not be modified" 
             });
         });
+    }
 });
 
 // 5 - DELETE - /api/posts/:id - Removes the post with the specified id and returns the **deleted post object**
@@ -88,11 +91,13 @@ router.delete('/:id', (req, res) => {
     Post.remove(id)
         .then(post => {
             if(!post) {
+                // WORKING
                 res.status(404).json({ 
                     message: "The post with the specified ID does not exist" 
                 });
             } else {
-                res.status(200).json(post);
+                // WORKING
+                res.status(200).json({...post, id: post.id});
             }
         })
         .catch(() => {
@@ -120,13 +125,6 @@ router.get('/:id/comments', (req, res) => {
                 message: "The comments information could not be retrieved" 
             });
         })
-});
-
-// CATCH-ALL
-router.use('*', (req, res) => {
-    res.status(404).json({ 
-        message: "404 NOT FOUND"
-    });
 });
 
 
