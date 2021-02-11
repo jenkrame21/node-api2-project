@@ -19,15 +19,15 @@ router.get('/', (req, res) => {
 
 // 2 - GET - /api/posts/:id - Returns **the post object with the specified id**
 router.get('/:id', (req, res) => {
-    const id = req.params.id;
+    const { id } = req.params;
     Post.findById(id)
         .then((post) => {
-            if (post) {
-                res.status(200).json(post);
-            } else {
+            if (!post) {
                 res.status(404).json({ 
                     message: "The post with the specified ID does not exist" 
                 });
+            } else {
+                res.status(200).json(post);
             }
         })
         .catch(() => {
@@ -86,25 +86,24 @@ router.put('/:id', (req, res) => {
 });
 
 // 5 - DELETE - /api/posts/:id - Removes the post with the specified id and returns the **deleted post object**
-router.delete('/:id', (req, res) => {
+router.delete('/:id', async (req, res) => {
     const id = req.params.id;
-    Post.remove(id)
-        .then((post) => {
-            if(!post) {
-                // WORKING
+    try {
+        const user = await Post.findById(id)
+            if (!user) {
                 res.status(404).json({ 
                     message: "The post with the specified ID does not exist" 
                 });
-            } else {
-                // WORKING
-                res.status(200).json({...post, id: post.id});
+                return ;
             }
-        })
-        .catch(() => {
-            res.status(500).json({ 
-                message: "The post could not be removed"
-            });
+            await Post.remove(id)
+                res.status(200).json(user);
+    } catch(err) {
+        res.status(500).json({
+            message: "The post could not be removed",
+            error: err.message
         });
+    }
 });
 
 // 6 - GET - /api/posts/:id/comments - Returns an **array of all the comment objects** associated with the post with the specified id
@@ -119,12 +118,12 @@ router.get('/:id/comments', (req, res) => {
                 message: "The post with the specified ID does not exist" 
             });
         }
-        })
-        .catch(() => {
-            res.status(500).json({ 
-                message: "The comments information could not be retrieved" 
-            });
-        })
+    })
+    .catch(() => {
+        res.status(500).json({ 
+            message: "The comments information could not be retrieved" 
+        });
+    })
 });
 
 
